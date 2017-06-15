@@ -1,5 +1,6 @@
 #include "settings.h"
 #include <fstream>
+#include <functional>
 //#include <iostream>
 
 #pragma GCC diagnostic ignored "-Wwrite-strings"
@@ -29,8 +30,8 @@ Settings::Settings()
 		}
 	} else {
 		currentProfile = "Default";
-	}
-	setup();
+    }
+    setup();
 }
 
 Settings::~Settings()
@@ -104,11 +105,53 @@ void Settings::setup() {
 	getBoolVal(proceedFromDerivativesToIntegrals,
 			   "proceed_from_derivatives_to_integrals", false);
 	getBoolVal(integrateSmoothed, "integrate_smoothed", false);
+
+	downVariables.clear();
+	downVariables.push_back("x");
+	upVariables.clear();
+	upVariables.push_back("x");
+	areaVariables.clear();
 	readFormulaVal(downFormula, downVariables, current["down_formula"], "$var2*$x^2");
 	readFormulaVal(upFormula, upVariables, current["up_formula"], "$var1+$var1*$x^2");
+    readFormulaVal(areaFormula, areaVariables, current["area_formula"], "24.5*$h^2");
+    readStatFormula(*this, userFormula[0], current["user_formula0"], "$Lmax / (9.81 * A($hmax))");
+    readStatFormula(*this, userFormula[1], current["user_formula1"], "$Lmax / A($hmax)");
+    readStatFormula(*this, userFormula[2], current["user_formula2"], "$Lmax / A($hmax - 0.73*($hmax - $hr))");
+    readStatFormula(*this, userFormula[3], current["user_formula3"], "$hr");
+    readStatFormula(*this, userFormula[4], current["user_formula4"], "$Wirr");
+    readStatFormula(*this, userFormula[5], current["user_formula5"], "$We");
+
 	getIntVal(fitGuessSteps, "fit_guess_steps", 1000000);
 	getIntVal(fitGuessPoints, "fit_guess_points", 15);
 	getIntVal(fitPoints, "fit_points", 100);
+}
+
+float Settings::A(float var) {
+	return Settings::get().areaFormula(&var);
+}
+
+std::vector<std::string> Settings::generateVarNames(const Settings& settings) {
+    std::vector<std::string> vars = {"Lmax", "hmax", "hr", "hp", "Amax", "Wirr", "We"};
+    for (unsigned int i = 1; i < settings.downVariables.size(); i++) {
+        for (unsigned int j = 0; j < vars.size(); j++) if (vars[j] == settings.downVariables[i])
+            throw(std::runtime_error("Variable name " + vars[j] + " is already used."));
+        vars.push_back(settings.downVariables[i]);
+    }
+    for (unsigned int i = 1; i < settings.upVariables.size(); i++) {
+        for (unsigned int j = 0; j < vars.size(); j++) if (vars[j] == settings.upVariables[i])
+            throw(std::runtime_error("Variable name " + vars[j] + " is already used."));
+        vars.push_back(settings.upVariables[i]);
+    }
+    return vars;
+}
+
+void Settings::readStatFormula(const Settings& settings, formula<float>& into, std::string source, char* ifAbsent) {
+    if (source.empty()) source = ifAbsent;
+    const std::vector<std::string>& vars = generateVarNames(settings);
+    std::vector<std::pair<std::string, float (*)(float)>> unaryFuncs;
+	unaryFuncs.push_back(std::make_pair("A", A));
+	const char* sourceStr = source.c_str();
+	into = formula<float>::parseFormula(sourceStr, vars, unaryFuncs);
 }
 
 void Settings::synchChanges() {
@@ -146,6 +189,7 @@ void Settings::synchChanges() {
 	current["integrate_smoothed"] = boolToString(integrateSmoothed);
 	current["up_formula"] = upFormula.print(upVariables);
 	current["down_formula"] = downFormula.print(downVariables);
+	current["area_formula"] = areaFormula.print(areaVariables);
 	current["fit_guess_steps"] = std::to_string(fitGuessSteps);
 	current["fit_guess_points"] = std::to_string(fitGuessPoints);
 	current["fit_points"] = std::to_string(fitPoints);
@@ -160,28 +204,4 @@ void Settings::synchChanges() {
 	for (std::pair<const std::string, std::map<std::string, std::string>>& it : profiles) {
 		if (it.first != currentProfile) printProfile(it.first);
 	}
-}
-
-void Settings::readFormulaVal(formula<std::valarray<float>>& into,
-		std::vector<std::string>& vars, std::string& source, char* ifAbsent) {
-	vars.clear();
-	vars.push_back("x");
-	std::string readingVar;
-	if (source.empty()) source = ifAbsent;
-	for (unsigned int i = 0; i < source.size(); i++) {
-		if (source[i] == '$') {
-			i++;
-			for ( ; (source[i] >= '0' && source[i] <= '9') || (source[i] >= 'a' && source[i] <= 'z')
-					 || (source[i] >= 'A' && source[i] <= 'Z') || source[i] == '_'; i++) {
-				readingVar.push_back(source[i]);
-			}
-			bool exists = false;
-			for (unsigned int i = 0; i < vars.size(); i++)
-				if (vars[i] == readingVar) exists = true;
-			if (!exists) vars.push_back(readingVar);
-			readingVar.clear();
-		}
-	}
-	const char* sourceStr = source.c_str();
-	into = formula<std::valarray<float>>::parseFormula(sourceStr, vars);
 }

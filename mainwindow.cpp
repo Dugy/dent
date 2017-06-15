@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	graphSelected_(-1),
 	changingComboText(false)
 {
-	ui->setupUi(this);
+    ui->setupUi(this);
 
     colour_[0] = QColor(255, 0, 0);
     colour_[1] = QColor(0, 255, 0);
@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     colour_[8] = QColor(100, 255, 255);
     colour_[9] = QColor(0, 0, 0);
 
-	loadSettings();
+    loadSettings();
 	rebuildProfilesCombo();
 
     ui->plot->setInteraction(QCP::iRangeDrag, true);
@@ -43,8 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 void MainWindow::loadSettings() {
-	Settings& settings = Settings::get();
-	settings.setup();
+    Settings& settings = Settings::get();
 
 	ui->coresEdit->setText(intToQString(settings.cores));
 	ui->xMinEdit->setText(floatToQString(settings.xMinCustom));
@@ -65,7 +64,7 @@ void MainWindow::loadSettings() {
 	ui->decreaseThresholdEdit->setText(floatToQString(settings.decreaseThreshold));
 	ui->pointsEdit->setText(floatToQString(settings.points));
 	ui->filterEnabledCheck->setChecked(settings.filterEnabled);
-	on_filterEnabledCheck_toggled(settings.filterEnabled);
+    on_filterEnabledCheck_toggled(settings.filterEnabled);
 	ui->loadNextCheckBox->setChecked(settings.proceedFromLoadToDerivatives);
 	ui->startFromEdit->setText(floatToQString(settings.startDerivativeFrom));
 	ui->endBeforeEdit->setText(floatToQString(settings.endDerivativeBefore));
@@ -76,11 +75,22 @@ void MainWindow::loadSettings() {
 	ui->intoleranceThresholdEdit->setText(
 				floatToQString(settings.intoleranceThreshold));
 	ui->popinSkipEdit->setText(floatToQString(settings.popinSkip));
-	ui->loadNextAgainCheckBox->setChecked(settings.proceedFromDerivativesToIntegrals);
+    ui->loadNextAgainCheckBox->setChecked(settings.proceedFromDerivativesToIntegrals);
 	ui->descendingFormulaEdit->setText(QString(
 				settings.downFormula.print(settings.downVariables).c_str()));
 	ui->ascendingFormulaEdit->setText(QString(
 				settings.upFormula.print(settings.upVariables).c_str()));
+	ui->areaFormulaEdit->setText(QString(
+				settings.areaFormula.print(settings.areaVariables).c_str()));
+    const std::vector<std::string>& vars = settings.generateVarNames(settings);
+    std::vector<std::pair<std::string, float (*)(float)>> unaryFuncs;
+    unaryFuncs.push_back(std::make_pair("A", Settings::A));
+    ui->func0Edit->setText(settings.userFormula[0].print(vars, unaryFuncs).c_str());
+    ui->func1Edit->setText(settings.userFormula[1].print(vars, unaryFuncs).c_str());
+    ui->func2Edit->setText(settings.userFormula[2].print(vars, unaryFuncs).c_str());
+    ui->func3Edit->setText(settings.userFormula[3].print(vars, unaryFuncs).c_str());
+    ui->func4Edit->setText(settings.userFormula[4].print(vars, unaryFuncs).c_str());
+    ui->func5Edit->setText(settings.userFormula[5].print(vars, unaryFuncs).c_str());
 	ui->fittingGuessesEdit->setText(intToQString(settings.fitGuessSteps));
 	ui->guessPointsEdit->setText(intToQString(settings.fitGuessPoints));
 	ui->fitPointsEdit->setText(intToQString(settings.fitPoints));
@@ -126,7 +136,7 @@ bool MainWindow::saveSettings() {
                 float max, QString error) -> float
         {
             float got = qStringToFloat(input->text());
-            if (got < min || got > max) {
+			if (got < min || got > max) {
                 throw error;
             }
             return got;
@@ -182,10 +192,27 @@ bool MainWindow::saveSettings() {
 		settings.integrateSmoothed = ui->integralSmoothedCheckBox->isChecked();
 		std::string descendingFormula = ui->descendingFormulaEdit->text().toUtf8().constData();
 		std::string ascendingFormula = ui->ascendingFormulaEdit->text().toUtf8().constData();
+		std::string areaFormula = ui->areaFormulaEdit->text().toUtf8().constData();
 		Settings::readFormulaVal(settings.downFormula, settings.downVariables,
 								descendingFormula, "$var1*$x^2");
 		Settings::readFormulaVal(settings.upFormula, settings.upVariables,
 								 ascendingFormula, "$var1*($x-$var2)^2");
+		Settings::readFormulaVal(settings.areaFormula, settings.areaVariables,
+								 areaFormula, "24.5*$h^2");
+        Settings::readStatFormula(settings, settings.userFormula[0],
+                ui->func0Edit->text().toUtf8().constData(), "$Lmax / (9.81 * A($hmax))");
+        Settings::readStatFormula(settings, settings.userFormula[1],
+                ui->func1Edit->text().toUtf8().constData(), "$Lmax / A($hmax)");
+        Settings::readStatFormula(settings, settings.userFormula[2],
+                ui->func2Edit->text().toUtf8().constData(), "$Lmax / A($hmax - 0.73*($hmax - $hr))");
+        Settings::readStatFormula(settings, settings.userFormula[3],
+                ui->func3Edit->text().toUtf8().constData(), "$hr");
+        Settings::readStatFormula(settings, settings.userFormula[4],
+                ui->func4Edit->text().toUtf8().constData(), "$Wirr");
+        Settings::readStatFormula(settings, settings.userFormula[5],
+                ui->func5Edit->text().toUtf8().constData(), "$We");
+		if (settings.areaVariables.size() > 1) throw(QString("Area function depends only on one "
+				"variable, penetration depth (h), you used ") + QString::number(settings.areaVariables.size()));
 		settings.fitGuessSteps = readInt(ui->fittingGuessesEdit, 10000,
 										 2000000000, "Bad number of fitting guess steps.");
 		settings.fitGuessPoints = readInt(ui->guessPointsEdit, 5,
@@ -268,7 +295,7 @@ void MainWindow::setupTasks(taskType first) {
 			case FITTING:
 				taskManager.addTask(new TaskFit(data));
 				if (first == FITTING) lastPlotted = FITTING;
-			case STATISTICS:
+			default:
 			{}
 		}
 	}
@@ -323,29 +350,53 @@ void MainWindow::plot(taskType what) {
 	float minY = 9000000000;
 	float maxY = -9000000000;
 	Settings& settings = Settings::get();
-	if (what == INTEGRAL_SUMMARY) {
+	if (what == INTEGRAL_SUMMARY || what >= FUNC0) {
 		QCPGraph* line = ui->plot->addGraph();
 		line->setPen(QPen(colour_[0]));
-		line->setName("Integral");
 		specialPlotted_.clear();
-		for (unsigned int i = 0; i < data_.size(); i++) {
-			float x = data_[i]->base[DOWN].end;
-			float y = data_[i]->integral[DOWN].points[data_[i]->integral[0].length - 1];
-			line->addData(x, y);
-			specialPlotted_.push_back(std::make_pair(x, y));
-			if (!settings.customZoom) {
-				if (x > maxX) maxX = x;
-				if (x < minX) minX = x;
-				if (y < minY) minY = y;
-				if (y > maxY) maxY = y;
+		if (what == INTEGRAL_SUMMARY) {
+			line->setName("Integral");
+			for (unsigned int i = 0; i < data_.size(); i++) {
+				float x = data_[i]->base[DOWN].end;
+				float y = data_[i]->integral[DOWN].points[data_[i]->integral[0].length - 1];
+				line->addData(x, y);
+				specialPlotted_.push_back(std::make_pair(x, y));
+				if (!settings.customZoom) {
+					if (x > maxX) maxX = x;
+					if (x < minX) minX = x;
+					if (y < minY) minY = y;
+					if (y > maxY) maxY = y;
+				}
+			}
+		}
+		if (what >= FUNC0) {
+			line->setName("User function");
+			for (unsigned int i = 0; i < data_.size(); i++) {
+				float x = data_[i]->Lmax;
+				const std::vector<float>& vars = data_[i]->getVariables();
+				float y = Settings::get().userFormula[what - FUNC0](&(vars[0]));
+				line->addData(x, y);
+				specialPlotted_.push_back(std::make_pair(x, y));
+				if (!settings.customZoom) {
+					if (x > maxX) maxX = x;
+					if (x < minX) minX = x;
+					if (y < minY) minY = y;
+					if (y > maxY) maxY = y;
+				}
 			}
 		}
 		if (data_.size() > 0) {
 			if (what == INTEGRAL_SUMMARY) {
 				ui->plot->xAxis->setLabel(QString::fromUtf8(
-							std::string("max " + data_[0]->axisX).c_str()));
+									std::string("max " + data_[0]->axisX).c_str()));
 				ui->plot->yAxis->setLabel(QString::fromUtf8(
-							std::string("max ∫(" + data_[0]->axisY + ")dh").c_str()));
+									std::string("max ∫(" + data_[0]->axisY + ")dh").c_str()));
+			}
+			if (what >= FUNC0) {
+				ui->plot->xAxis->setLabel(QString::fromUtf8(
+									std::string("max " + data_[0]->axisX).c_str()));
+				ui->plot->yAxis->setLabel(QString::fromUtf8(
+							std::string("Function " + std::to_string(what - FUNC0 + 1)).c_str()));
 			}
 		}
 	} else {
@@ -525,7 +576,7 @@ void MainWindow::on_saveButton_clicked()
 {
 	if (!saveSettings()) return;
 	if (data_.empty()) return;
-	if (lastPlotted == INTEGRAL_SUMMARY) {
+	if (lastPlotted == INTEGRAL_SUMMARY || lastPlotted >= FUNC0) {
 		QString fileName = QFileDialog::getSaveFileName(this,
 							tr("Choose file name and location"), "");
 		std::ofstream stream(fileName.toUtf8().constData(),
@@ -705,4 +756,34 @@ void MainWindow::on_plotFittingButton_clicked()
 void MainWindow::on_plotIntegralButton_2_clicked()
 {
 	plot(INTEGRAL_SUMMARY);
+}
+
+void MainWindow::on_showFunc0Button_clicked()
+{
+	plot(FUNC0);
+}
+
+void MainWindow::on_showFunc1Button_clicked()
+{
+	plot(FUNC1);
+}
+
+void MainWindow::on_showFunc2Button_clicked()
+{
+	plot(FUNC2);
+}
+
+void MainWindow::on_showFunc3Button_clicked()
+{
+	plot(FUNC3);
+}
+
+void MainWindow::on_showFunc4Button_clicked()
+{
+	plot(FUNC4);
+}
+
+void MainWindow::on_showFunc5Button_clicked()
+{
+	plot(FUNC5);
 }

@@ -5,6 +5,8 @@
 #include <iostream>
 #include <vector>
 
+#define GRABBED_VARIABLES 7
+
 enum curveDirection {
     UP,
     DOWN
@@ -46,6 +48,19 @@ struct graph {
     bool visible;
     std::vector<float> popins;
 	std::vector<float> fittedVars[2];
+	union {
+		struct {
+			float Lmax; // max force applied
+			float hmax; // max penetration depth
+			float hr; // sink-in as if the decreasing part was linear
+			float hp; // sink-in
+			float Amax; // max penetrated area
+			float Wirr; // inelastic work
+			float We; // elastic work
+		};
+        float grabbedParametres[GRABBED_VARIABLES];
+	};
+    std::vector<float> getVariables();
 };
 
 #endif // STRUCTS

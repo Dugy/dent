@@ -105,6 +105,8 @@ void TaskIntegral::perform() {
 				data_->raw[DOWN] : data_->base[DOWN], data_->integral[DOWN], data_);
 	if (error_.empty()) setDone(1);
 	else setDone(-1);
+    data_->Wirr = data_->integral[DOWN].points[data_->integral[DOWN].length - 1];
+    data_->We = data_->integral[UP].points[data_->integral[UP].length - 1];
 }
 
 bool TaskIntegral::canPerformNow() {

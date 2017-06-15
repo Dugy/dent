@@ -874,6 +874,261 @@
          <attribute name="title">
           <string>Statistics</string>
          </attribute>
+         <widget class="QLabel" name="areaLabel">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>31</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Area:</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="areaFormulaEdit">
+          <property name="geometry">
+           <rect>
+            <x>50</x>
+            <y>10</y>
+            <width>431</width>
+            <height>16</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="func1Edit">
+          <property name="geometry">
+           <rect>
+            <x>90</x>
+            <y>50</y>
+            <width>331</width>
+            <height>16</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLabel" name="func1Label">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>50</y>
+            <width>71</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Function 2:</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="showFunc1Button">
+          <property name="geometry">
+           <rect>
+            <x>430</x>
+            <y>50</y>
+            <width>51</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Show</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="showFunc2Button">
+          <property name="geometry">
+           <rect>
+            <x>430</x>
+            <y>70</y>
+            <width>51</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Show</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="func2label">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>70</y>
+            <width>71</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Function 3:</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="func2Edit">
+          <property name="geometry">
+           <rect>
+            <x>90</x>
+            <y>70</y>
+            <width>331</width>
+            <height>16</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="showFunc3Button">
+          <property name="geometry">
+           <rect>
+            <x>430</x>
+            <y>90</y>
+            <width>51</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Show</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="func3Label">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>90</y>
+            <width>71</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Function 4:</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="func3Edit">
+          <property name="geometry">
+           <rect>
+            <x>90</x>
+            <y>90</y>
+            <width>331</width>
+            <height>16</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="showFunc4Button">
+          <property name="geometry">
+           <rect>
+            <x>430</x>
+            <y>110</y>
+            <width>51</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Show</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="func4Label">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>110</y>
+            <width>71</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Function 5:</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="func4Edit">
+          <property name="geometry">
+           <rect>
+            <x>90</x>
+            <y>110</y>
+            <width>331</width>
+            <height>16</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="showFunc5Button">
+          <property name="geometry">
+           <rect>
+            <x>430</x>
+            <y>130</y>
+            <width>51</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Show</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="func5Label">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>130</y>
+            <width>71</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Function 6:</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="func5Edit">
+          <property name="geometry">
+           <rect>
+            <x>90</x>
+            <y>130</y>
+            <width>331</width>
+            <height>16</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="showFunc0Button">
+          <property name="geometry">
+           <rect>
+            <x>430</x>
+            <y>30</y>
+            <width>51</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Show</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="func0Label">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>30</y>
+            <width>71</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Function 1:</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="func0Edit">
+          <property name="geometry">
+           <rect>
+            <x>90</x>
+            <y>30</y>
+            <width>331</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+         <widget class="QLabel" name="usableVariablesLabel">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>150</y>
+            <width>471</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>You can use fitted values and calculated Lmax, hmax, hr, hp, Amax, Wirr, We</string>
+          </property>
+         </widget>
         </widget>
         <widget class="QWidget" name="reportTab">
          <attribute name="title">
@@ -1243,7 +1498,7 @@
      <x>0</x>
      <y>0</y>
      <width>826</width>
-     <height>19</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>

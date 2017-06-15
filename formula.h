@@ -70,8 +70,10 @@ struct formula {
 	}
 	operator bool() const { return !data.empty(); }
 	void clear() { data.clear(); }
-	std::string print(const std::vector<std::string>& vars) {
-		return data[0].print(vars);
+    std::string print(const std::vector<std::string>& vars,
+            const std::vector<std::pair<std::string, scalar (*)(scalar)>>& unaryFuncs =
+            std::vector<std::pair<std::string, scalar (*)(scalar)>>()) {
+        return data[0].print(vars, unaryFuncs);
 	}
 	void setValueMaker(std::function<scalar(FORMULA_FLOATING_TYPE)> valueMakerSet) const {
 		valueMaker = valueMakerSet;
@@ -187,15 +189,17 @@ struct formula {
 	}
 	static inline formula<scalar> func(scalar (*func)(scalar), const formula& term) {
 		std::vector<subFormula> made(1 + term.data.size());
-		made[0] = subFormula(FUNC_UNARY, func, &made[0]);
+		made[0] = subFormula(FUNC_UNARY, func, &made[1]);
 		for (unsigned int i = 0; i < term.data.size(); i++) {
 			made[i + 1] = term.data[i];
 			made[i + 1].relocate((long int)&made[i + 1] - (long int)&term.data[i]);
 		}
 		return formula<scalar>(made);
 	}
-	static formula<scalar> parseFormula(const char*& string, const std::vector<std::string> &vars) {
-		//std::cerr << "Parsing formula " << string << std::endl;
+	static formula<scalar> parseFormula(const char*& string, const std::vector<std::string> &vars,
+									const std::vector<std::pair<std::string, scalar (*)(scalar)>>& unaryFuncs
+									= std::vector<std::pair<std::string, scalar (*)(scalar)>>()) {
+		std::cerr << "Parsing formula " << string << std::endl;
 
 		formula<scalar> added;
 		formula<scalar> multiplied;
@@ -314,7 +318,7 @@ struct formula {
 				lastTerm = '$';
 			} else if (string[0] == '(') {
 				string++;
-				term = parseFormula(string, vars); // Terms in brackets are done recursively
+				term = parseFormula(string, vars, unaryFuncs); // Terms in brackets are done recursively
 				string++;
 				lastTerm = '(';
 			} else if ((string[0] >= '0' && string[0] <= '9') ||
@@ -344,7 +348,7 @@ struct formula {
 				}
 				term = formula<scalar>::constant(result * sign);
 				lastTerm = '1';
-			} else if (string[0] >= 'a' && string[0] <= 'z') {
+			} else if (string[0] >= 'a' && string[0] <= 'z' || string[0] >= 'A' && string[0] <= 'Z') {
 				formula<scalar>(*got)(const formula<scalar>& term) = nullptr;
 				if (string[0] == 'a') {
 					if (string[1] == 's') {
@@ -368,12 +372,26 @@ struct formula {
 					if (readString("ln(")) got = &formula<scalar>::naturalLogarithm;
 				}
 				if (got) {
-					formula<scalar> within = parseFormula(string, vars);
+					formula<scalar> within = parseFormula(string, vars, unaryFuncs);
 					string++;
 					lastTerm = 'f';
 					term = (*got)(within);
 				} else {
-					throw (std::runtime_error("Unknown function, use only sin, "
+					std::cerr << "No identifiable term found\n";
+					lastTerm = '?';
+					for (unsigned int i = 0; i < unaryFuncs.size(); i++) {
+						unsigned int j = 0;
+						for ( ; unaryFuncs[i].first[j] != 0; j++)
+							if (unaryFuncs[i].first[j] != string[j]) break;
+						if (string[j] == '(') {
+							std::cerr << "Found function named " << unaryFuncs[i].first << "()\n";
+							string += 2;
+							formula<scalar> within = parseFormula(string, vars, unaryFuncs);
+							lastTerm = 'f';
+							term = formula<scalar>::func(unaryFuncs[i].second, within);
+						}
+					}
+					if (lastTerm == '?') throw (std::runtime_error("Unknown function, use only sin, "
 						   "cos, tan, asin, acos, atan, exp, ln and abs"));
 				}
 			}
@@ -704,67 +722,71 @@ private:
 				throw(std::logic_error("Function has encountered a really weird operation name"));
 			}
 		}
-		std::string print(const std::vector<std::string>& vars) const {
+		std::string print(const std::vector<std::string>& vars,
+				const std::vector<std::pair<std::string, scalar (*)(scalar)>>& unaryFuncs =
+				std::vector<std::pair<std::string, scalar (*)(scalar)>>()) const {
 			switch (type) {
 			case CONSTANT :
 				return std::to_string(value);
 			case CALL :
 				return "$" + vars[index];
 			case SUM :
-				return "(" + term1->print(vars)
-						+ " + " + term2->print(vars) + ")";
+				return "(" + term1->print(vars, unaryFuncs)
+						+ " + " + term2->print(vars, unaryFuncs) + ")";
 			case SUM_CONST :
 				return "(" + std::to_string(constant)
-						+ " + " + nonConstant->print(vars) + ")";
+						+ " + " + nonConstant->print(vars, unaryFuncs) + ")";
 			case MULTIPLICATION :
-				return "(" + term1->print(vars) + " * " + term2->print(vars) + ")";
+				return "(" + term1->print(vars, unaryFuncs) + " * " + term2->print(vars, unaryFuncs) + ")";
 			case MULTIPLICATION_CONST :
 				return "(" + std::to_string(constant)
-						+ " * " + nonConstant->print(vars) + ")";
+						+ " * " + nonConstant->print(vars, unaryFuncs) + ")";
 			case POWER :
-				return "(" + term1->print(vars) + " ^ " + term2->print(vars) + ")";
+				return "(" + term1->print(vars, unaryFuncs) + " ^ " + term2->print(vars, unaryFuncs) + ")";
 			case SQUARE :
-				return "(" + term->print(vars) + " ^ 2)";
+				return "(" + term->print(vars, unaryFuncs) + " ^ 2)";
 			case CUBE :
-				return "(" + term->print(vars) + " ^ 3)";
+				return "(" + term->print(vars, unaryFuncs) + " ^ 3)";
 			case INVERSE :
-				return "(1 / " + term->print(vars) + ")";
+				return "(1 / " + term->print(vars, unaryFuncs) + ")";
 			case SQUARE_ROOT :
-				return "sqrt(" + term->print(vars) + ")";
+				return "sqrt(" + term->print(vars, unaryFuncs) + ")";
 			case POWER_CONSTANT :
-				return "(" + nonConstant->print(vars)
+				return "(" + nonConstant->print(vars, unaryFuncs)
 						+ " ^ " + std::to_string(constant) + ")";
 			case UNNATURAL_EXPONENTIAL :
 				return "(" + std::to_string(constant)
-						+ " ^ " + nonConstant->print(vars) + ")";
+						+ " ^ " + nonConstant->print(vars, unaryFuncs) + ")";
 			case EXPONENTIAL :
-				return "e ^(" + term->print(vars) + ")";
+				return "e ^(" + term->print(vars, unaryFuncs) + ")";
 			case SINE :
-				return "sin(" + term->print(vars) + ")";
+				return "sin(" + term->print(vars, unaryFuncs) + ")";
 			case ARCSINE :
-				return "arcsin(" + term->print(vars) + ")";
+				return "arcsin(" + term->print(vars, unaryFuncs) + ")";
 			case COSINE :
-				return "cos(" + term->print(vars) + ")";
+				return "cos(" + term->print(vars, unaryFuncs) + ")";
 			case ARCCOSINE :
-				return "arccos(" + term->print(vars) + ")";
+				return "arccos(" + term->print(vars, unaryFuncs) + ")";
 			case TANGENT :
-				return "tan(" + term->print(vars) + ")";
+				return "tan(" + term->print(vars, unaryFuncs) + ")";
 			case ARCTANGENT :
-				return "arctan(" + term->print(vars) + ")";
+				return "arctan(" + term->print(vars, unaryFuncs) + ")";
 			case LOGARITHM :
-				return "log(" + term1->print(vars) + ")(" + term2->print(vars) + ")";
+				return "log(" + term1->print(vars, unaryFuncs) + ")(" + term2->print(vars, unaryFuncs) + ")";
 			case NATURAL_LOGARITHM :
-				return "ln(" + term->print(vars) + ")";
+				return "ln(" + term->print(vars, unaryFuncs) + ")";
 			case ABSOLUTE_VALUE :
-				return "abs(" + term->print(vars) + ")";
+				return "abs(" + term->print(vars, unaryFuncs) + ")";
 			case FUNC_ENTRY :
 				return "func_" + std::to_string((long int)funcEntry) + "";
 			case FUNC_UNARY :
-				return "func_" + std::to_string((long int)funcUnary)
-						+ "(" + arg->print(vars) + ")";
+				for (int index = 0; index < unaryFuncs.size(); index++)
+					if (unaryFuncs[index].second == funcUnary)
+						return unaryFuncs[index].first + "(" + arg->print(vars, unaryFuncs) + ")";
+				throw(std::logic_error("Found unnamed function as unaryFunction"));
 //			case FUNC_BINARY :
 //				return "func_" + std::to_string((long int)funcBinary)
-//				+ "(" + arg1->print(vars) + ", " + arg2->print(vars) + ")";
+//				+ "(" + arg1->print(vars, unaryFuncs) + ", " + arg2->print(vars, unaryFuncs) + ")";
 			default:
 				throw(std::logic_error("Function has been given a really weird operation name "
 									   + std::to_string((int)type)));

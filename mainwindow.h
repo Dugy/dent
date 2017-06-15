@@ -80,6 +80,18 @@ private slots:
 
 	void on_plotIntegralButton_2_clicked();
 
+    void on_showFunc0Button_clicked();
+
+	void on_showFunc1Button_clicked();
+
+	void on_showFunc2Button_clicked();
+
+	void on_showFunc3Button_clicked();
+
+	void on_showFunc4Button_clicked();
+
+	void on_showFunc5Button_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -95,7 +107,12 @@ private:
 		INTEGRALS,
 		INTEGRAL_SUMMARY,
 		FITTING,
-		STATISTICS
+        FUNC0, // These must be last
+        FUNC1,
+        FUNC2,
+        FUNC3,
+        FUNC4,
+        FUNC5
     };
     taskType lastPlotted;
     void plot(taskType what = UNSPECIFIED);

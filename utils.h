@@ -9,7 +9,7 @@ inline int qStringToInt(QString str) {
 }
 
 inline float qStringToFloat(QString str) {
-    return atof(str.toUtf8().constData());
+	return str.toFloat();
 }
 
 inline QString intToQString(int num) {

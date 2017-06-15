@@ -231,6 +231,18 @@ std::string parseFile(graph& result) {
 		if (end < reverse)
 			end = parsed2.size() - 1; // The end is cut
 
+        result.Lmax = parsed2[middle];
+        result.hmax = parsed1[middle];
+        result.hp = parsed1[end];
+        int hrstart = middle + 0.05 * (end - middle);
+        int hrend = hrstart + 10;
+        if (hrend > parsed1.size())
+            result.hr = result.hp;
+        else {
+            float curvature = (parsed1[hrend] - parsed1[hrstart]) / (parsed2[hrend] - parsed2[hrstart]);
+            result.hr = curvature * (parsed2[end] - parsed2[middle]);
+        }
+
 		//std::cerr << "Curve " << result.name << " beginning " << beginning << " " << parsed1[beginning] << " middle " << middle << " " << parsed1[middle] << " reverse " << reverse << " " << parsed1[reverse] << " end " << end << " " << parsed1[end] << " size " << parsed1.size() << std::endl;
 		//std::cerr << "End found at " << end << std::endl;
 		auto fillCurve = [&] (curve& data, int front, int back) {
