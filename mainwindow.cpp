@@ -397,7 +397,7 @@ void MainWindow::plot(taskType what) {
 				ui->plot->xAxis->setLabel(QString::fromUtf8(
 									std::string("max " + data_[0]->axisX).c_str()));
 				ui->plot->yAxis->setLabel(QString::fromUtf8(
-							std::string("Function " + std::to_string(what - FUNC0 + 1)).c_str()));
+							std::string("Function " + to_string(what - FUNC0 + 1)).c_str()));
 			}
 		}
 	} else {
@@ -800,7 +800,7 @@ void MainWindow::on_insertAreaValuesButton_clicked()
 	for (int i = 0; i < 6; i++) {
 		QLineEdit* lineEdit = new QLineEdit(&dialog);
 		QString label = QString(i < 2 ? (i == 0 ? "Power 2" : "Power 1") : std::string("Power 1/"
-										+ std::to_string((int)(1 << (i - 1)))).c_str());
+										+ to_string((int)(1 << (i - 1)))).c_str());
 		form.addRow(label, lineEdit);
 		coefficients << lineEdit;
 	}

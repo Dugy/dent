@@ -55,14 +55,14 @@ void Settings::setup() {
 	auto getFloatVal = [&] (float& into, const char* key, float ifAbsent) {
 		std::string& found = current[key];
 		if (found.empty()) {
-			found = std::to_string(ifAbsent);
+			found = to_string(ifAbsent);
 			into = ifAbsent;
 		} else into = std::stof(found);
 	};
 	auto getIntVal = [&] (unsigned int& into, const char* key, unsigned int ifAbsent) {
 		std::string& found = current[key];
 		if (found.empty()) {
-			found = std::to_string(ifAbsent);
+			found = to_string(ifAbsent);
 			into = ifAbsent;
 		} else into = std::stoi(found);
 	};
@@ -157,42 +157,42 @@ void Settings::readStatFormula(const Settings& settings, formula<float>& into, s
 void Settings::synchChanges() {
 	std::map<std::string, std::string>& current = profiles[currentProfile];
 	current["folder"] = folder;
-	current["cores"] = std::to_string(cores);
+	current["cores"] = to_string(cores);
 	current["custom_zoom"] = boolToString(customZoom);
-	current["x_min_custom"] = std::to_string(xMinCustom);
-	current["x_max_custom"] = std::to_string(xMaxCustom);
-	current["y_min_custom"] = std::to_string(yMinCustom);
-	current["y_max_custom"] = std::to_string(yMaxCustom);
+	current["x_min_custom"] = to_string(xMinCustom);
+	current["x_max_custom"] = to_string(xMaxCustom);
+	current["y_min_custom"] = to_string(yMinCustom);
+	current["y_max_custom"] = to_string(yMaxCustom);
 	current["show_descending"] = boolToString(showDescending);
 	current["show_ascending"] = boolToString(showAscending);
-	current["filter_x_width"] = std::to_string(filterXWidth);
-	current["filter_x_maximum"] = std::to_string(filterXMaximum);
-	current["filter_x_slope"] = std::to_string(filterXSlope);
-	current["filter_y_width"] = std::to_string(filterYWidth);
-	current["filter_y_maximum"] = std::to_string(filterYMaximum);
-	current["filter_y_slope"] = std::to_string(filterYSlope);
-	current["change_sampling"] = std::to_string(changeSampling);
-	current["increase_threshold"] = std::to_string(increaseThreshold);
-	current["decrease_threshold"] = std::to_string(decreaseThreshold);
+	current["filter_x_width"] = to_string(filterXWidth);
+	current["filter_x_maximum"] = to_string(filterXMaximum);
+	current["filter_x_slope"] = to_string(filterXSlope);
+	current["filter_y_width"] = to_string(filterYWidth);
+	current["filter_y_maximum"] = to_string(filterYMaximum);
+	current["filter_y_slope"] = to_string(filterYSlope);
+	current["change_sampling"] = to_string(changeSampling);
+	current["increase_threshold"] = to_string(increaseThreshold);
+	current["decrease_threshold"] = to_string(decreaseThreshold);
 	current["filter_enabled"] = boolToString(filterEnabled);
-	current["points"] = std::to_string(points);
+	current["points"] = to_string(points);
 	current["proceed_from_load_to_derivatives"] =
 			boolToString(proceedFromLoadToDerivatives);
-	current["start_derivative_from"] = std::to_string(startDerivativeFrom);
-	current["end_derivative_before"] = std::to_string(endDerivativeBefore);
-	current["derivative_smoothing_width"] = std::to_string(derivativeSmoothingWidth);
-	current["derivative_smoothing_slope"] = std::to_string(derivativeSmoothingSlope);
-	current["intolerance_threshold"] = std::to_string(intoleranceThreshold);
-	current["popin_skip"] = std::to_string(intoleranceThreshold);
+	current["start_derivative_from"] = to_string(startDerivativeFrom);
+	current["end_derivative_before"] = to_string(endDerivativeBefore);
+	current["derivative_smoothing_width"] = to_string(derivativeSmoothingWidth);
+	current["derivative_smoothing_slope"] = to_string(derivativeSmoothingSlope);
+	current["intolerance_threshold"] = to_string(intoleranceThreshold);
+	current["popin_skip"] = to_string(intoleranceThreshold);
 	current["proceed_from_derivatives_to_integrals"] =
 			boolToString(proceedFromDerivativesToIntegrals);
 	current["integrate_smoothed"] = boolToString(integrateSmoothed);
 	current["up_formula"] = upFormula.print(upVariables);
 	current["down_formula"] = downFormula.print(downVariables);
 	current["area_formula"] = areaFormula.print(areaVariables);
-	current["fit_guess_steps"] = std::to_string(fitGuessSteps);
-	current["fit_guess_points"] = std::to_string(fitGuessPoints);
-	current["fit_points"] = std::to_string(fitPoints);
+	current["fit_guess_steps"] = to_string(fitGuessSteps);
+	current["fit_guess_points"] = to_string(fitGuessPoints);
+	current["fit_points"] = to_string(fitPoints);
 	std::ofstream file("settings.ini");
 	auto printProfile = [&] (const std::string& name) {
 		file << "[" << name << "]" << std::endl;

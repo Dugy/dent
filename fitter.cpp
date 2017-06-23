@@ -47,7 +47,7 @@ std::string fit(curve& from, curve& result, graph* data, curveDirection dir) {
 									 : "Fitted values for ascending curve: ";
 	for (unsigned int i = 1; i < values.size(); i++)
 		report += " " + (dir == DOWN ? settings.downVariables[i] : settings.upVariables[i])
-				+ "=" + std::to_string(values[i]);
+				+ "=" + to_string(values[i]);
 	report += "\n";
 	Log::write(report);
 	return ""; // Not failed

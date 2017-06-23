@@ -3,6 +3,14 @@
 #include <QString>
 #include <string>
 #include <cstdlib>
+#include <iostream>
+#include <sstream>
+
+inline std::string to_string(const float num) {
+	std::stringstream strm;
+	strm << num;
+	return strm.str();
+}
 
 inline int qStringToInt(QString str) {
     return atoi(str.toUtf8().constData());
@@ -13,17 +21,17 @@ inline float qStringToFloat(QString str) {
 }
 
 inline QString intToQString(int num) {
-    return QString(std::to_string(num).c_str());
+	return QString(to_string(num).c_str());
 }
 
 
 inline QString floatToQString(float num) {
     if (num > 10 || num < -10 || num == 0 ||
             ((int)num < num * 1.001 && (int)num > num * 0.999))
-        return QString(std::to_string((int)num).c_str());
+		return QString(to_string((int)num).c_str());
 
     // Nope, it isn't a simple case
-    QString result = std::to_string((int)num).c_str();
+	QString result = to_string((int)num).c_str();
     if (num < 0) num *= -1;
     result.push_back('.');
     if (num >= 1) {

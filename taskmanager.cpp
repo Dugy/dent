@@ -89,6 +89,6 @@ void TaskManager::work() {
 
     clock_t end = clock();
     double elapsed = double(end - begin) / CLOCKS_PER_SEC;
-	Log::write("Tasks took " + std::to_string(elapsed) + " seconds.\n");
+	Log::write("Tasks took " + to_string(elapsed) + " seconds.\n");
 }
 

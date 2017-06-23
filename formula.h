@@ -9,6 +9,7 @@
 #include <memory>
 #include <type_traits>
 #include <functional>
+#include "utils.h"
 
 #define FORMULA_FLOATING_TYPE float
 
@@ -727,19 +728,19 @@ private:
 				std::vector<std::pair<std::string, scalar (*)(scalar)>>()) const {
 			switch (type) {
 			case CONSTANT :
-				return std::to_string(value);
+				return to_string(value);
 			case CALL :
 				return "$" + vars[index];
 			case SUM :
 				return "(" + term1->print(vars, unaryFuncs)
 						+ " + " + term2->print(vars, unaryFuncs) + ")";
 			case SUM_CONST :
-				return "(" + std::to_string(constant)
+				return "(" + to_string(constant)
 						+ " + " + nonConstant->print(vars, unaryFuncs) + ")";
 			case MULTIPLICATION :
 				return "(" + term1->print(vars, unaryFuncs) + " * " + term2->print(vars, unaryFuncs) + ")";
 			case MULTIPLICATION_CONST :
-				return "(" + std::to_string(constant)
+				return "(" + to_string(constant)
 						+ " * " + nonConstant->print(vars, unaryFuncs) + ")";
 			case POWER :
 				return "(" + term1->print(vars, unaryFuncs) + " ^ " + term2->print(vars, unaryFuncs) + ")";
@@ -753,9 +754,9 @@ private:
 				return "sqrt(" + term->print(vars, unaryFuncs) + ")";
 			case POWER_CONSTANT :
 				return "(" + nonConstant->print(vars, unaryFuncs)
-						+ " ^ " + std::to_string(constant) + ")";
+						+ " ^ " + to_string(constant) + ")";
 			case UNNATURAL_EXPONENTIAL :
-				return "(" + std::to_string(constant)
+				return "(" + to_string(constant)
 						+ " ^ " + nonConstant->print(vars, unaryFuncs) + ")";
 			case EXPONENTIAL :
 				return "e ^(" + term->print(vars, unaryFuncs) + ")";
@@ -778,18 +779,18 @@ private:
 			case ABSOLUTE_VALUE :
 				return "abs(" + term->print(vars, unaryFuncs) + ")";
 			case FUNC_ENTRY :
-				return "func_" + std::to_string((long int)funcEntry) + "";
+				return "func_" + to_string((long int)funcEntry) + "";
 			case FUNC_UNARY :
 				for (int index = 0; index < unaryFuncs.size(); index++)
 					if (unaryFuncs[index].second == funcUnary)
 						return unaryFuncs[index].first + "(" + arg->print(vars, unaryFuncs) + ")";
 				throw(std::logic_error("Found unnamed function as unaryFunction"));
 //			case FUNC_BINARY :
-//				return "func_" + std::to_string((long int)funcBinary)
+//				return "func_" + to_string((long int)funcBinary)
 //				+ "(" + arg1->print(vars, unaryFuncs) + ", " + arg2->print(vars, unaryFuncs) + ")";
 			default:
 				throw(std::logic_error("Function has been given a really weird operation name "
-									   + std::to_string((int)type)));
+									   + to_string((int)type)));
 			}
 		}
 	};
