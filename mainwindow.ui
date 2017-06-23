@@ -892,7 +892,7 @@
            <rect>
             <x>50</x>
             <y>10</y>
-            <width>431</width>
+            <width>321</width>
             <height>16</height>
            </rect>
           </property>
@@ -1127,6 +1127,19 @@
           </property>
           <property name="text">
            <string>You can use fitted values and calculated Lmax, hmax, hr, hp, Amax, Wirr, We</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="insertAreaValuesButton">
+          <property name="geometry">
+           <rect>
+            <x>380</x>
+            <y>7</y>
+            <width>101</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Insert values</string>
           </property>
          </widget>
         </widget>

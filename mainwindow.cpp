@@ -338,6 +338,7 @@ void MainWindow::listGraphs() {
 }
 
 void MainWindow::plot(taskType what) {
+	saveSettings();
     if (what == UNSPECIFIED) what = lastPlotted;
 	if (what == UNSPECIFIED) {
         std::cerr << "Trying to plot an unknown type of graph." << std::endl;
@@ -786,4 +787,50 @@ void MainWindow::on_showFunc4Button_clicked()
 void MainWindow::on_showFunc5Button_clicked()
 {
 	plot(FUNC5);
+}
+
+void MainWindow::on_insertAreaValuesButton_clicked()
+{
+	QDialog dialog(this);
+	QFormLayout form(&dialog);
+
+	form.addRow(new QLabel("Set the standard values of the polynomial"));
+
+	QList<QLineEdit*> coefficients;
+	for (int i = 0; i < 6; i++) {
+		QLineEdit* lineEdit = new QLineEdit(&dialog);
+		QString label = QString(i < 2 ? (i == 0 ? "Power 2" : "Power 1") : std::string("Power 1/"
+										+ std::to_string((int)(1 << (i - 1)))).c_str());
+		form.addRow(label, lineEdit);
+		coefficients << lineEdit;
+	}
+
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+							   Qt::Horizontal, &dialog);
+	form.addRow(&buttonBox);
+	QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+
+	if (dialog.exec() == QDialog::Accepted) {
+		formula<> result = formula<>::constant(0);
+		const char* read = coefficients[0]->text().toUtf8().constBegin();
+		if (read[0] != 0 && (read[0] != '0' || read[1] != 0)) {
+			result = formula<>::multiplication(formula<>::constant(atof(read)),
+											   formula<>::square(formula<>::call(0)));
+		}
+		read = coefficients[1]->text().toUtf8().constBegin();
+		if (read[0] != 0 && (read[0] != '0' || read[1] != 0)) {
+			result = formula<>::sum(result, formula<>::multiplication(
+								formula<>::constant(atof(read)), formula<>::call(0)));
+		}
+		for (int i = 2; i < 6; i++) {
+			read = coefficients[i]->text().toUtf8().constBegin();
+			if (read[0] != 0 && (read[0] != '0' || read[1] != 0)) {
+				result = formula<>::sum(result, formula<>::multiplication(formula<>::constant(atof(read)),
+											formula<>::power(formula<>::call(0), 1 / (1 << (i - 1)))));
+			}
+		}
+		std::vector<std::string> vars = {"h"};
+		ui->areaFormulaEdit->setText(result.print(vars).c_str());
+	}
 }

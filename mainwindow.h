@@ -92,6 +92,8 @@ private slots:
 
 	void on_showFunc5Button_clicked();
 
+	void on_insertAreaValuesButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 
