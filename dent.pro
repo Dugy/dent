@@ -28,7 +28,8 @@ SOURCES += main.cpp\
 	integrator.cpp \
 	formula.cpp \
 	functionfitter.cpp \
-	fitter.cpp
+	fitter.cpp \
+    structs.cpp
 
 HEADERS  += mainwindow.h \
 	structs.h \
