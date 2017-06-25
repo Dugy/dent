@@ -57,7 +57,7 @@ void Settings::setup() {
 		if (found.empty()) {
 			found = to_string(ifAbsent);
 			into = ifAbsent;
-		} else into = std::stof(found);
+		} else into = stor(found);
 	};
 	auto getIntVal = [&] (unsigned int& into, const char* key, unsigned int ifAbsent) {
 		std::string& found = current[key];
@@ -193,6 +193,14 @@ void Settings::synchChanges() {
 	current["fit_guess_steps"] = to_string(fitGuessSteps);
 	current["fit_guess_points"] = to_string(fitGuessPoints);
 	current["fit_points"] = to_string(fitPoints);
+	current["area_formula"] = areaFormula.print(areaVariables);
+	const std::vector<std::string>& vars = generateVarNames(*this);
+	std::vector<std::pair<std::string, float (*)(float)>> unaryFuncs;
+	unaryFuncs.push_back(std::make_pair("A", Settings::A));
+	for (unsigned int i = 0; i < USER_FORMULAS; i++) {
+		current["user_formula" + std::to_string(i)] =
+				userFormula[i].print(vars, unaryFuncs);
+	}
 	std::ofstream file("settings.ini");
 	auto printProfile = [&] (const std::string& name) {
 		file << "[" << name << "]" << std::endl;

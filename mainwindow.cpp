@@ -812,25 +812,25 @@ void MainWindow::on_insertAreaValuesButton_clicked()
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 
 	if (dialog.exec() == QDialog::Accepted) {
-		formula<> result = formula<>::constant(0);
+		std::string result = "0";
+		auto addToResult = [&] (const std::string& added) {
+			if (result == "0") result = added;
+			else result += " + " + added;
+		};
 		const char* read = coefficients[0]->text().toUtf8().constBegin();
 		if (read[0] != 0 && (read[0] != '0' || read[1] != 0)) {
-			result = formula<>::multiplication(formula<>::constant(atof(read)),
-											   formula<>::square(formula<>::call(0)));
+			addToResult(read + std::string(" * $h ^ 2"));
 		}
 		read = coefficients[1]->text().toUtf8().constBegin();
 		if (read[0] != 0 && (read[0] != '0' || read[1] != 0)) {
-			result = formula<>::sum(result, formula<>::multiplication(
-								formula<>::constant(atof(read)), formula<>::call(0)));
+			addToResult(read + std::string(" * $h"));
 		}
 		for (int i = 2; i < 6; i++) {
 			read = coefficients[i]->text().toUtf8().constBegin();
 			if (read[0] != 0 && (read[0] != '0' || read[1] != 0)) {
-				result = formula<>::sum(result, formula<>::multiplication(formula<>::constant(atof(read)),
-											formula<>::power(formula<>::call(0), 1 / (1 << (i - 1)))));
+				addToResult(read + std::string(" * $h ^ ") + to_string( 1.0 / (1 << (i - 1))));
 			}
 		}
-		std::vector<std::string> vars = {"h"};
-		ui->areaFormulaEdit->setText(result.print(vars).c_str());
+		ui->areaFormulaEdit->setText(result.c_str());
 	}
 }

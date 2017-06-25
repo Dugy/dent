@@ -200,7 +200,7 @@ struct formula {
 	static formula<scalar> parseFormula(const char*& string, const std::vector<std::string> &vars,
 									const std::vector<std::pair<std::string, scalar (*)(scalar)>>& unaryFuncs
 									= std::vector<std::pair<std::string, scalar (*)(scalar)>>()) {
-		std::cerr << "Parsing formula " << string << std::endl;
+		//std::cerr << "Parsing formula " << string << std::endl;
 
 		formula<scalar> added;
 		formula<scalar> multiplied;
@@ -349,7 +349,7 @@ struct formula {
 				}
 				term = formula<scalar>::constant(result * sign);
 				lastTerm = '1';
-			} else if (string[0] >= 'a' && string[0] <= 'z' || string[0] >= 'A' && string[0] <= 'Z') {
+			} else if ((string[0] >= 'a' && string[0] <= 'z') || (string[0] >= 'A' && string[0] <= 'Z')) {
 				formula<scalar>(*got)(const formula<scalar>& term) = nullptr;
 				if (string[0] == 'a') {
 					if (string[1] == 's') {
@@ -378,14 +378,12 @@ struct formula {
 					lastTerm = 'f';
 					term = (*got)(within);
 				} else {
-					std::cerr << "No identifiable term found\n";
 					lastTerm = '?';
 					for (unsigned int i = 0; i < unaryFuncs.size(); i++) {
 						unsigned int j = 0;
 						for ( ; unaryFuncs[i].first[j] != 0; j++)
 							if (unaryFuncs[i].first[j] != string[j]) break;
 						if (string[j] == '(') {
-							std::cerr << "Found function named " << unaryFuncs[i].first << "()\n";
 							string += 2;
 							formula<scalar> within = parseFormula(string, vars, unaryFuncs);
 							lastTerm = 'f';
@@ -649,6 +647,8 @@ private:
 			case FUNC_UNARY :
 				correct(arg);
 				break;
+			default:
+				break;
 			}
 		}
 
@@ -657,7 +657,7 @@ private:
 			switch (type) {
 			case CONSTANT :
 				if (std::is_integral<scalar>::value) {
-					return *(scalar*)&value;
+					return (scalar)value;
 				} else {
 					return valueMaker(value);
 				}
@@ -781,7 +781,7 @@ private:
 			case FUNC_ENTRY :
 				return "func_" + to_string((long int)funcEntry) + "";
 			case FUNC_UNARY :
-				for (int index = 0; index < unaryFuncs.size(); index++)
+				for (int index = 0; index < (int)unaryFuncs.size(); index++)
 					if (unaryFuncs[index].second == funcUnary)
 						return unaryFuncs[index].first + "(" + arg->print(vars, unaryFuncs) + ")";
 				throw(std::logic_error("Found unnamed function as unaryFunction"));

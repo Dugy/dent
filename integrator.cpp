@@ -13,9 +13,16 @@ std::string integrate(curve& from, curve& result, graph* data) {
 	result.points = new float[from.length];
 	result.length = from.length;
 	float sum = 0;
-	for (unsigned int i = 0; i < from.length; i++) {
-		sum += from.points[i] * step;
-		result.points[i] = sum;
+	if (step >= 0) {
+		for (unsigned int i = 0; i < from.length; i++) {
+			sum += from.points[i] * step;
+			result.points[i] = sum;
+		}
+	} else {
+		for (unsigned int i = 0; i < from.length; i++) {
+			sum -= from.points[i] * step;
+			result.points[i] = sum;
+		}
 	}
 	return ""; // Not failed
 }
